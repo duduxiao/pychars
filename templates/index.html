@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+</head>
+<style>
+    .mg-b10{
+        margin-bottom: 10px;
+    }
+    #button{
+        width: 80px;
+        height: 30px;
+    }
+    textarea{
+        width: 400px;
+        vertical-align: middle;
+    }
+    select{
+        width: 406px;
+        height: 32px;
+    }
+</style>
+<script type="text/javascript">
+    $(function () {
+        $('#button').click(function () {
+            var d = {};
+            var t = $('#form').serializeArray();
+
+            $.each(t, function () {
+                d[this.name] = this.value;
+            });
+            $.ajax({
+               type: "POST",
+               url: "/get_photo_html",
+               data: d,
+               success: function(data){
+                   console.log(data);
+                        $("img").attr('src', 'data:image/png;base64,'+data);
+                  }
+            });
+        });
+    });
+</script>
+<body>
+<div style="float: left;">
+    <form id="form">
+        <div class="mg-b10">
+            <label for="t">类型</label>
+            <select name="t" id="t">
+                <option value="HBar">柱形图(水平)</option>
+                <option value="line">曲线图</option>
+                <option value="pie">饼图</option>
+                <option value="radar">雷达图</option>
+                <option value="dot">散列图</option>
+                <option value="bar">柱形图(垂直)</option>
+            </select>
+        </div>
+        <div class="mg-b10">
+            <label for="settings">设置</label>
+            <textarea id="settings" name="settings" rows="8">{
+	"title": "",
+	"width": 800,
+	"height": 800,
+	"style": {
+		"label_font_size": 20,
+		"major_label_font_size": 20,
+		"value_font_size": 20,
+		"value_label_font_size": 20,
+		"legend_font_size": 20
+	},
+	"other": {
+		"fill": "True",
+		"show_legend": "True"
+	}
+}</textarea>
+        </div>
+        <div class="mg-b10">
+            <label for="data">数据</label>
+            <textarea id="data" name="data" rows="5">{
+	"data": {
+		"key1": 10,
+		"key2": 20,
+		"key3": 30
+	}
+}</textarea>
+        </div>
+        <button type="button" id="button">提交</button>
+    </form>
+        <p>style="font_family":"Microsoft YaHei"--字体<br>
+        "label_font_size":20--坐标字体大小 <br>
+        "major_label_font_size":20--轴线主字体大小<br>
+        "value_font_size":20--值字体大小<br>
+        "value_label_font_size":20--图中名字体大小<br>
+        "tooltip_font_size":20--字体大小<br>
+        "title_font_size":20--标题字体大小<br>
+        "legend_font_size":20--图例字体大小<br></p>
+        <p>other="fill":"True"--是否填充颜色<br>
+        "legend_at_bottom":"True"--图例是否显示在底部<br>
+        "print_values":"True"--是否显示图中数值<br>
+        "show_legend":"True"--是否显示图例<br></p>
+        其他other参考：<a href="http://www.pygal.org/en/stable/documentation/configuration/chart.html#options" target="_blank">这里</a>
+        其他style参考：<a href="http://www.pygal.org/en/stable/documentation/custom_styles.html" target="_blank">这里</a>
+
+</div>
+<div style="float: right">
+    <img src="#" height="600" width="600" alt=""/>
+</div>
+
+</body>
+</html>
