@@ -122,7 +122,7 @@ import logging
 import django.utils.log
 import logging.handlers
 
-log_path = os.path.join(BASE_DIR, "log")
+log_path = os.path.join(BASE_DIR, "logs")
 if not os.path.exists(log_path):
     os.makedirs("logs")
 # DJANGO_LOG_LEVEL=DEBUG
@@ -162,7 +162,7 @@ LOGGING = {
         'default': {  # 默认的
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件，自动切
-            'filename': os.path.join(BASE_DIR + '/log/', "all.log"),  # 日志文件
+            'filename': os.path.join(BASE_DIR + '/logs/', "all.log"),  # 日志文件
             'maxBytes': 1024 * 1024 * 50,  # 日志大小 50M
             'backupCount': 3,  # 最多备份几个
             'formatter': 'standard',
@@ -171,7 +171,7 @@ LOGGING = {
         'error': {  # 专门用来记错误日志
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件，自动切
-            'filename': os.path.join(BASE_DIR + '/log/', "error.log"),  # 日志文件
+            'filename': os.path.join(BASE_DIR + '/logs/', "error.log"),  # 日志文件
             'maxBytes': 1024 * 1024 * 50,  # 日志大小 50M
             'backupCount': 5,
             'formatter': 'standard',
@@ -180,7 +180,7 @@ LOGGING = {
         'collect': {  # 专门定义一个收集特定信息的日志
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件，自动切
-            'filename': os.path.join(BASE_DIR + '/log/', "collect.log"),
+            'filename': os.path.join(BASE_DIR + '/logs/', "collect.log"),
             'maxBytes': 1024 * 1024 * 50,  # 日志大小 50M
             'backupCount': 5,
             'formatter': 'collect',
@@ -189,7 +189,7 @@ LOGGING = {
         'scprits_handler': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR + '/log/', "script.log"),
+            'filename': os.path.join(BASE_DIR + '/logs/', "script.log"),
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
             'formatter': 'standard',

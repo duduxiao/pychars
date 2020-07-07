@@ -2,9 +2,13 @@ from django.http import HttpResponse
 from pygal.style import Style
 import json, logging
 import pygal
-import base64
+import base64,os
+from wordcloud import WordCloud
+import graphviz as gz
 
-DEFAULT_TYPE = ['bar', 'line', 'pie', 'radar', 'dot', 'HBar']
+os.system('dot -Tpng png/relation -o png/relation.png')
+
+DEFAULT_TYPE = ['bar', 'line', 'pie', 'radar', 'dot', 'HBar','WordCloud','graph']
 DEFAULT_ERROR_LIST = {'ERROR_TYPE': {'code': 'E0001', 'message': '未知的类型'},
                       'ERROR_DATA': {'code': 'E0002'},
                       'SUCCESS': {'code': '00000'},
@@ -249,6 +253,56 @@ def get_photo(request):
                 dot_chart.add(k, v)
             dot_chart.render_to_png("png/dot.png")
             b64 = get_base64("png/dot.png")
+        elif tp == 'WordCloud':
+            style = settings["style"]
+            wc = WordCloud(
+                font_path='C:\windows\Fonts\simfang.ttf',
+                **style
+            )
+
+            a = {}
+            for word in data['data']:
+                name = word["name"]
+                a[name] = word["value"]
+            wc.generate_from_frequencies(a)
+            wc.to_file(r"png/WordCloud.png")
+            b64 = get_base64("png/WordCloud.png")
+        elif tp == 'graph':
+            datas = data["data"]
+            data = datas["ControllerData"]["Paths"]
+            CompanyName = datas["CompanyName"]
+            # print(name1)
+            KeyN = datas["KeyNo"]
+            dot = gz.Digraph(format="png")
+
+            node = settings.get("node", {})
+            node["fontname"] = "Microsoft YaHei"
+            edge = settings.get("edge", {})
+            graph = settings.get("edge", {})
+            dot.attr('node', **node)
+            dot.attr('edge', **edge)
+            dot.attr('edge', **graph)
+            graph_data = set()
+            for f in data:
+                reverse_data = list(reversed(f))
+                for i, re in enumerate(reverse_data):
+                    name = re["Name"]
+                    Percent = re["Percent"]
+                    KeyNo = re["KeyNo"]
+                    try:
+                        name1 = reverse_data[i + 1]["Name"]
+                        KeyNo1 = reverse_data[i + 1]["KeyNo"]
+                    except Exception:
+                        name1 = CompanyName
+                        KeyNo1 = KeyN
+                    dot.node(KeyNo, name)
+                    dot.node(KeyNo1, name1)
+                    graph_data.add(KeyNo + '|' + KeyNo1 + '|' + Percent)
+            for i in graph_data:
+                data = i.split('|')
+                dot.edge(data[0], data[1], data[2])
+            dot.render("png/relation")
+            b64 = get_base64("png/relation.png")
         else:
             return HttpResponse(json.dumps(DEFAULT_ERROR_LIST['ERROR_TYPE']),
                                 content_type="application/json,charset=utf-8")

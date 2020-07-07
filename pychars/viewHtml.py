@@ -4,8 +4,10 @@ from django.shortcuts import render
 import json, logging
 import pygal
 from pychars.views import get_base64
+from wordcloud import WordCloud
+import graphviz as gz
 
-DEFAULT_TYPE = ['bar', 'line', 'pie', 'radar', 'dot', 'HBar']
+DEFAULT_TYPE = ['bar', 'line', 'pie', 'radar', 'dot', 'HBar','WordCloud','graph']
 
 
 def get_photo_html(request):
@@ -92,6 +94,55 @@ def get_photo_html(request):
                 dot_chart.add(k, v)
             dot_chart.render_to_png("png/dot.png")
             b64 = get_base64("png/dot.png")
+        elif tp == 'WordCloud':
+            style = settings["style"]
+            wc = WordCloud(
+                font_path='/Users/donggua/Library/Fonts/msyh.ttf',
+                **style
+            )
+
+            a = {}
+            for word in data['data']:
+                name = word["name"]
+                a[name] = word["value"]
+            wc.generate_from_frequencies(a)
+            wc.to_file(r"png/WordCloud.png")
+            b64 = get_base64("png/WordCloud.png")
+        elif tp == 'graph':
+            datas = data["data"]
+            data = datas["ControllerData"]["Paths"]
+            CompanyName = datas["CompanyName"]
+            # print(name1)
+            KeyN = datas["KeyNo"]
+            dot = gz.Digraph(format="png")
+            node = settings.get("node", {})
+            node["fontname"] = "Microsoft YaHei"
+            edge = settings.get("edge", {})
+            graph = settings.get("graph", {})
+            dot.attr('node', **node)
+            dot.attr('edge', **edge)
+            dot.attr('graph', **graph)
+            graph_data = set()
+            for f in data:
+                reverse_data = list(reversed(f))
+                for i, re in enumerate(reverse_data):
+                    name = re["Name"]
+                    Percent = re["Percent"]
+                    KeyNo = re["KeyNo"]
+                    try:
+                        name1 = reverse_data[i + 1]["Name"]
+                        KeyNo1 = reverse_data[i + 1]["KeyNo"]
+                    except Exception:
+                        name1 = CompanyName
+                        KeyNo1 = KeyN
+                    dot.node(KeyNo, name)
+                    dot.node(KeyNo1, name1)
+                    graph_data.add(KeyNo + '|' + KeyNo1 + '|' + Percent)
+            for i in graph_data:
+                data = i.split('|')
+                dot.edge(data[0], data[1], data[2])
+            dot.render("png/relation")
+            b64 = get_base64("png/relation.png")
     except Exception as e:
         logging.error(e)
     return HttpResponse(json.dumps(b64), content_type='application/json')
